@@ -1,0 +1,39 @@
+# Configuration of client
+
+# https://askubuntu.com/questions/499578/vlc-unattended-video-playback-of-sporadic-udp-video-source
+# https://rwdy15.wordpress.com/2015/02/12/streaming-with-ffmpeg-and-receiving-with-vlc/
+
+## Install Rapberry Pi OS
+Install your raspberry as you would do normally
+
+Configure lower screen resolution
+
+sudo nano /boot/config.txt
+hdmi_group=1
+hdmi_mode=
+
+Remove unnecessery components
+apt --purge remove cups
+apt --purge remove gvfs-common gvfs-daemons gvfs-fuse gvfs-backends
+
+Remove Session Manager and Window manager
+apt --purge remove lxde lightdm lxsession openbox
+
+# In order for the "pi" user to start a X session, you need to allow it access to /dev/tty
+sudo gpasswd -a pi tty
+
+# Make it autostart : edit .bashrc and append those lines :
+if [ "$SSH_TTY" = "" ]; then
+    if [ -f ~/kiosk.sh ]; then
+        startx /etc/X11/Xsession /home/pi/kiosk.sh --
+    fi
+fi
+
+# The kiosk.sh stript contains
+#!/bin/sh
+
+/usr/bin/vlc --fullscreen --no-mouse-events --loop --no-osd \
+        /home/pi/kiosk-boot.jpg \
+        udp://@:5001
+
+vlc --fullscreen --no-mouse-events --loop --no-osd udp://@:PortNumber
